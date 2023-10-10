@@ -7,6 +7,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +21,7 @@ import com.reward.service.RewardService;
 @Service
 public class RewardServiceImpl implements RewardService {
 	
+	private static final Logger logger = LoggerFactory.getLogger(RewardServiceImpl.class);
 	@Autowired
 	private RewardRepository rewardRepository;
 
@@ -44,22 +47,28 @@ public class RewardServiceImpl implements RewardService {
 
 	@Override
 	public String getRewardsBytransactionId(long transactionId) {
+		logger.info("Getting transaction details by transaction id : {}",transactionId);
 		Optional<Transaction> transactionDetailsOptional = rewardRepository.findById(transactionId);
 		if(transactionDetailsOptional.isPresent()) {
 			Transaction transactionDetails = transactionDetailsOptional.get();
+			logger.info("Transaction details are : {}",transactionDetails);
 			return "You received "+transactionDetails.getRewards()+" reward points for "+transactionDetails.getTransactionId()+" transaction id and spent $"+transactionDetails.getTransactionAmount();
 		} else {
-			return transactionId + "transactionId is not existed";
+			logger.error("transactionId "+ transactionId +" is not existed");
+			return "transactionId "+ transactionId +" is not existed";
 		}
 	}
 
 	@Override
 	public TotalRewards getTotalRewardsPointsByDateRange(long customerId, String startDate, String endDate) throws ParseException {
+		logger.info("getTotalRewardsPointsByDateRange():: started");
 		TotalRewards totalRewards = new TotalRewards();
 		totalRewards.setCustomerId(customerId);
 		List<Transaction> allTransactions = null;
 		if(startDate.length()>0 && endDate.length()>0) {
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+			logger.info("startDate: ",startDate);
+			logger.info("endDate: ",endDate);
 			allTransactions = rewardRepository.findByCustomerIdAndTransactionDateBetween(customerId, sdf.parse(startDate), sdf.parse(endDate));
 		}else {
 			Calendar calendar = Calendar.getInstance();
@@ -73,6 +82,8 @@ public class RewardServiceImpl implements RewardService {
 			for(Transaction transaction: allTransactions) {
 				points = points + transaction.getRewards();
 			}
+			logger.info("All Transaction count is : ",allTransactions.size());
+			logger.info("Total rewards points is : ",points);
 			totalRewards.setTotalRewardsPoints(points+"");
 		}
 		return totalRewards;
