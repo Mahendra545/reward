@@ -29,11 +29,11 @@ public class RewardServiceImpl implements RewardService {
 	public String transaction(TransactionDto transaction) {
 		Transaction transactionDetails = new Transaction();
 		long rewards=0;
-		if(transaction.getTransactionAmount()>50 && transaction.getTransactionAmount()<=100) {
+		if(transaction.getTransactionAmount() !=null && transaction.getTransactionAmount()>50 && transaction.getTransactionAmount()<=100) {
 			int rewardsAmount = (int)(transaction.getTransactionAmount()-50);
 			rewards = rewardsAmount*1;
 		}
-		if(transaction.getTransactionAmount()>=100) {
+		if(transaction.getTransactionAmount() !=null && transaction.getTransactionAmount()>=100) {
 			long rewardsAmount = (long)(Math.round(transaction.getTransactionAmount()-100));
 			rewards = rewards + (rewardsAmount*2)+50;
 		}
@@ -65,10 +65,10 @@ public class RewardServiceImpl implements RewardService {
 		TotalRewards totalRewards = new TotalRewards();
 		totalRewards.setCustomerId(customerId);
 		List<Transaction> allTransactions = null;
-		if(startDate.length()>0 && endDate.length()>0) {
+		if(startDate !=null && endDate != null && startDate.length()>0 && endDate.length()>0) {
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-			logger.info("startDate: ",startDate);
-			logger.info("endDate: ",endDate);
+			logger.info("startDate: {}",startDate);
+			logger.info("endDate: {}",endDate);
 			allTransactions = rewardRepository.findByCustomerIdAndTransactionDateBetween(customerId, sdf.parse(startDate), sdf.parse(endDate));
 		}else {
 			Calendar calendar = Calendar.getInstance();
@@ -82,8 +82,8 @@ public class RewardServiceImpl implements RewardService {
 			for(Transaction transaction: allTransactions) {
 				points = points + transaction.getRewards();
 			}
-			logger.info("All Transaction count is : ",allTransactions.size());
-			logger.info("Total rewards points is : ",points);
+			logger.info("All Transaction count is : {}",allTransactions.size());
+			logger.info("Total rewards points is : {}",points);
 			totalRewards.setTotalRewardsPoints(points+"");
 		}
 		return totalRewards;
